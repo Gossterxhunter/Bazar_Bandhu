@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Bazar Bandhu - Wallet</title>
+  <style>
+    /* Reset and base */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    }
+    body {
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #e6f0e6; /* very light green */
+      color: #145A32; /* deep green */
+      position: relative; /* for footer positioning */
+    }
+
+    /* Container */
+    .wallet-box {
+      background: #ffffff;
+      border-radius: 20px;
+      width: 420px;
+      max-width: 90vw;
+      padding: 40px 35px;
+      box-shadow: 0 6px 15px rgba(20, 90, 50, 0.15);
+      text-align: center;
+      user-select: none;
+      z-index: 1;
+    }
+
+    h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 18px;
+      letter-spacing: 0.02em;
+      user-select: text;
+    }
+
+    .points-display {
+      font-size: 3.8rem;
+      font-weight: 900;
+      color: #145A32;
+      margin-bottom: 22px;
+      letter-spacing: 1.5px;
+      user-select: text;
+      transition: color 0.3s ease;
+    }
+
+    .progress-container {
+      background: #d3e4d3;
+      border-radius: 12px;
+      overflow: hidden;
+      height: 18px;
+      margin-bottom: 28px;
+      box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: #145A32;
+      width: 0%;
+      transition: width 0.5s ease;
+      border-radius: 12px 0 0 12px;
+      box-shadow: inset 0 0 5px rgba(20, 90, 50, 0.5);
+    }
+
+    .deal-btn {
+      background: #145A32;
+      color: #fff;
+      padding: 14px 28px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      border: none;
+      border-radius: 14px;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(20, 90, 50, 0.3);
+      transition: background-color 0.3s ease, transform 0.2s ease;
+      user-select: none;
+      letter-spacing: 0.03em;
+    }
+    .deal-btn:hover,
+    .deal-btn:focus {
+      background: #1e8449;
+      outline: none;
+      transform: scale(1.05);
+    }
+    .deal-btn:active {
+      transform: scale(0.95);
+    }
+
+    .history {
+      margin-top: 10px;
+      font-size: 1rem;
+      max-height: 130px;
+      overflow-y: auto;
+      color: #145A32;
+      user-select: text;
+      padding-right: 6px;
+      scrollbar-width: thin;
+      scrollbar-color: #145A32 #d3e4d3;
+      text-align: left;
+    }
+    .history::-webkit-scrollbar {
+      width: 6px;
+    }
+    .history::-webkit-scrollbar-track {
+      background: #d3e4d3;
+      border-radius: 8px;
+    }
+    .history::-webkit-scrollbar-thumb {
+      background-color: #145A32;
+      border-radius: 8px;
+      border: 2px solid #d3e4d3;
+    }
+
+    .history-item {
+      background: #f0f8f0;
+      border-left: 4px solid #145A32;
+      padding: 8px 12px;
+      border-radius: 6px;
+      margin: 6px 0;
+      font-weight: 600;
+      color: #145A32;
+      box-shadow: 0 1px 4px rgba(20, 90, 50, 0.15);
+      word-wrap: break-word;
+      line-height: 1.3;
+      user-select: text;
+    }
+
+    /* Bottom centered red text */
+    .footer-text {
+      position: fixed;
+      bottom: 15px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: #c0392b; /* bright red */
+      font-weight: 600;
+      font-size: 1rem;
+      user-select: text;
+      background: rgba(255, 255, 255, 0.8);
+      padding: 4px 10px;
+      border-radius: 10px;
+      box-shadow: 0 0 6px rgba(192, 57, 43, 0.5);
+      z-index: 10;
+    }
+  </style>
+</head>
+<body>
+
+  <main class="wallet-box" role="main" aria-label="My Wallet">
+    <h1>💰 My Wallet</h1>
+    <div class="points-display" id="points" aria-live="polite" aria-atomic="true">0</div>
+    <div class="progress-container" aria-label="Points progress bar">
+      <div class="progress-bar" id="progress"></div>
+    </div>
+    <button class="deal-btn" onclick="addDeal()" aria-label="Add a new deal and earn points">
+      + Add Deal & Earn Points
+    </button>
+    <section class="history" id="history" aria-live="polite" aria-label="Recent deals history"></section>
+  </main>
+
+  <div class="footer-text" aria-live="polite">
+    *This page is meant for official purpose only.
+  </div>
+
+<script>
+  let points = parseInt(localStorage.getItem('walletPoints')) || 0;
+  let history = JSON.parse(localStorage.getItem('walletHistory')) || [];
+
+  function updateUI() {
+    document.getElementById('points').innerText = points;
+    let progress = points % 100;
+    document.getElementById('progress').style.width = progress + "%";
+    renderHistory();
+  }
+
+  function addDeal() {
+    let earned = Math.floor(Math.random() * 20) + 5;
+    points += earned;
+    history.unshift(`+${earned} pts earned at ${new Date().toLocaleTimeString()}`);
+    if (history.length > 5) history.pop();
+    localStorage.setItem('walletPoints', points);
+    localStorage.setItem('walletHistory', JSON.stringify(history));
+    updateUI();
+    animatePoints();
+  }
+
+  function animatePoints() {
+    const pointsDisplay = document.getElementById('points');
+    pointsDisplay.style.transition = 'transform 0.2s ease';
+    pointsDisplay.style.transform = "scale(1.2)";
+    setTimeout(() => {
+      pointsDisplay.style.transform = "scale(1)";
+    }, 200);
+  }
+
+  function renderHistory() {
+    const historyDiv = document.getElementById('history');
+    historyDiv.innerHTML = history.map(h => `<div class="history-item">${h}</div>`).join('');
+  }
+
+  updateUI();
+</script>
+
+</body>
+</html>

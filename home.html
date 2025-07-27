@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Bazar Bandhu</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f8f9fa;
+    }
+    header {
+      background: linear-gradient(to right, #43dd74, #00c26e);
+      color: white;
+      padding: 40px 20px;
+      text-align: center;
+    }
+    header h1 {
+      font-size: 2.5rem;
+      font-weight: bold;
+    }
+    .chatbot {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: white;
+      border-radius: 12px;
+      border: 1px solid #ccc;
+      padding: 15px;
+      width: 300px;
+      display: none;
+      z-index: 1000;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+    .chatbot-toggle {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #0f83ff;
+      color: white;
+      border: none;
+      padding: 14px;
+      border-radius: 50%;
+      z-index: 1001;
+      font-size: 20px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      cursor: pointer;
+    }
+    .chat-history {
+      max-height: 150px;
+      overflow-y: auto;
+      margin-bottom: 10px;
+      font-size: 0.9rem;
+    }
+    footer {
+      background-color: #212529;
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+    #feedback {
+      background: linear-gradient(to right, #43dd74, #00c26e);
+      color: white;
+      padding: 60px 20px;
+    }
+    #qr-reader {
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      margin: auto;
+    }
+    .list-group {
+      z-index: 10;
+      cursor: pointer;
+    }
+    .nav-btns a {
+      margin: 0 5px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Bazar Bandhu</h1>
+    <p class="lead">Smart. Secure. Personalized Ordering App Near Your Cart</p>
+  </header>
+
+  <main class="text-center my-4">
+    <div class="nav-btns">
+      <a href="#" class="btn btn-outline-primary">Home</a>
+      <a href="sign_Up.html" class="btn btn-outline-primary">Sign In | Sign Up</a>
+      <a href="wallet.html" class="btn btn-outline-primary">Wallet</a>
+      <a href="about_us.html" class="btn btn-outline-primary">About Us</a>
+    </div>
+  </main>
+
+  <section class="container my-4 text-center">
+    <div class="row justify-content-center">
+      <div class="col-md-8 position-relative">
+        <input
+          id="universal-search"
+          class="form-control"
+          placeholder="Search for a food or a supplier"
+          autocomplete="off"
+        />
+        <ul class="list-group position-absolute w-100" id="universal-suggestions"></ul>
+      </div>
+      <div class="col-12 mt-3">
+        <button class="btn btn-success px-4" onclick="universalSearch()">Search</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="section text-center">
+    <h4 class="mb-4">Search Results</h4>
+    <div id="search-results" class="container"></div>
+  </section>
+
+  <section class="section text-center">
+    <h2>Scan Your QR Code</h2>
+    <p>Use your camera to scan and pay.</p>
+    <div id="qr-reader" style="width: 250px;"></div>
+    <p id="qr-result" class="mt-3 text-success"></p>
+  </section>
+
+  <section id="feedback" class="text-center">
+    <h2>We’d Love to Hear from You</h2>
+    <p>Your feedback helps us improve your experience.</p>
+    <form class="w-50 mx-auto">
+      <div class="mb-3">
+        <input type="text" class="form-control" placeholder="Your Name" />
+      </div>
+      <div class="mb-3">
+        <input type="email" class="form-control" placeholder="Your Email" />
+      </div>
+      <div class="mb-3">
+        <textarea class="form-control" rows="3" placeholder="Share your thoughts or questions..."></textarea>
+      </div>
+      <button type="submit" class="btn btn-light">Send Message</button>
+    </form>
+  </section>
+
+  <button class="chatbot-toggle" onclick="toggleChatbot()">💬</button>
+  <div class="chatbot" id="chatbot">
+    <h6>Smart Assistant</h6>
+    <div class="chat-history" id="chat-history"></div>
+    <input
+      type="text"
+      class="form-control mb-2"
+      id="chat-input"
+      placeholder="Ask me anything..."
+      onkeydown="if(event.key==='Enter'){sendChatMessage()}"
+    />
+    <button class="btn btn-sm btn-primary" onclick="sendChatMessage()">Send</button>
+  </div>
+
+  <footer>
+    <p>&copy; 2025 Bazar Bandhu. Built to keep you safe and healthy.</p>
+  </footer>
+
+  <script>
+    const suppliers = [
+      "BigBasket", "Reliance Fresh", "Nature's Basket", "Spencer's", "More Retail",
+      "Star Bazaar", "JioMart", "FreshToHome", "Grofers", "Amazon Pantry",
+      "Dunzo", "Metro Cash & Carry", "Easyday", "Flipkart Grocery", "Smart Bazaar"
+    ];
+
+    const items = ["Tomato", "Onion", "Potato", "Carrot", "Spinach", "Rice", "Wheat", "Turmeric", "Chili Powder"];
+
+    const demoReviews = [
+      "Amazing quality and quick delivery!",
+      "Satisfied with the purchase. Will buy again.",
+      "Average service, could improve.",
+      "Great value for money!",
+      "Packaging was neat and clean.",
+      "Not very fresh this time, a bit disappointed.",
+      "Highly recommended to everyone!",
+      "Excellent customer support and fast response!"
+    ];
+
+    // Map items to suppliers (simulate which supplier provides which items)
+    const itemSupplierMap = {
+      "Tomato": ["BigBasket", "Reliance Fresh", "More Retail", "JioMart"],
+      "Onion": ["Spencer's", "FreshToHome", "Amazon Pantry", "Smart Bazaar"],
+      "Potato": ["Dunzo", "Metro Cash & Carry", "Flipkart Grocery"],
+      "Carrot": ["BigBasket", "Star Bazaar", "Easyday"],
+      "Spinach": ["Nature's Basket", "JioMart", "FreshToHome"],
+      "Rice": ["Reliance Fresh", "More Retail", "Amazon Pantry", "Flipkart Grocery"],
+      "Wheat": ["Spencer's", "Smart Bazaar", "Metro Cash & Carry"],
+      "Turmeric": ["BigBasket", "Dunzo", "Easyday"],
+      "Chili Powder": ["Star Bazaar", "JioMart", "FreshToHome", "Smart Bazaar"]
+    };
+
+    const searchInput = document.getElementById("universal-search");
+    const suggestionBox = document.getElementById("universal-suggestions");
+    const resultContainer = document.getElementById("search-results");
+
+    function getRandomRating() {
+      return Math.floor(Math.random() * 5) + 1;
+    }
+
+    function getStarHTML(rating) {
+      return '★'.repeat(rating) + '☆'.repeat(5 - rating);
+    }
+
+    function getRandomReview() {
+      return demoReviews[Math.floor(Math.random() * demoReviews.length)];
+    }
+
+    searchInput.addEventListener("input", () => {
+      const query = searchInput.value.trim().toLowerCase();
+      suggestionBox.innerHTML = "";
+      if (query === "") return;
+
+      const allSuggestions = [
+        ...suppliers.map(sup => `${sup} (Supplier)`),
+        ...items.map(item => `${item} (Item)`)
+      ];
+
+      const matches = allSuggestions.filter(item => item.toLowerCase().includes(query));
+
+      matches.forEach(match => {
+        const li = document.createElement("li");
+        li.className = "list-group-item list-group-item-action";
+        li.textContent = match;
+        li.onclick = () => {
+          searchInput.value = match.split(" (")[0];
+          suggestionBox.innerHTML = "";
+          universalSearch();
+        };
+        suggestionBox.appendChild(li);
+      });
+    });
+
+    searchInput.addEventListener("blur", () => {
+      setTimeout(() => (suggestionBox.innerHTML = ""), 150);
+      if (searchInput.value.trim() === "") {
+        searchInput.placeholder = "Search for a food or a supplier";
+      }
+    });
+
+    searchInput.addEventListener("focus", () => {
+      searchInput.placeholder = "";
+    });
+
+    function universalSearch() {
+      const query = searchInput.value.trim().toLowerCase();
+      resultContainer.innerHTML = "";
+
+      if (!query) {
+        resultContainer.innerHTML = `<div class="alert alert-info">Please enter a search term.</div>`;
+        return;
+      }
+
+      // Check if query is an item
+      const foundItem = items.find(item => item.toLowerCase() === query);
+      if (foundItem) {
+        // Show all suppliers for this item with random ratings
+        const suppliersForItem = itemSupplierMap[foundItem] || [];
+        if (suppliersForItem.length === 0) {
+          resultContainer.innerHTML = `<div class="alert alert-warning">No suppliers found for ${foundItem}.</div>`;
+          return;
+        }
+
+        let html = `<h5>Suppliers providing <strong>${foundItem}</strong></h5>`;
+        html += `<div class="list-group w-75 mx-auto text-start">`;
+
+        suppliersForItem.forEach(supplier => {
+          const rating = getRandomRating();
+          const stars = getStarHTML(rating);
+          const review = getRandomReview();
+
+          html += `
+            <div class="list-group-item">
+              <h6 class="mb-1">${supplier}</h6>
+              <div class="text-warning mb-1" style="font-size: 1.2rem;">${stars}</div>
+              <p class="text-muted" style="font-size: 0.9rem;">"${review}"</p>
+            </div>`;
+        });
+
+        html += `</div>`;
+        resultContainer.innerHTML = html;
+        return;
+      }
+
+      // Otherwise, check if query matches suppliers
+      const supMatches = suppliers.filter(sup => sup.toLowerCase().includes(query));
+      if (supMatches.length > 0) {
+        displayResults("Matching Suppliers", supMatches, "Supplier");
+      } else {
+        // If no match found
+        resultContainer.innerHTML = `<div class="alert alert-danger">No matching items or suppliers found.</div>`;
+      }
+    }
+
+    function displayResults(title, results, typeLabel) {
+      if (results.length === 0) return;
+
+      let html = `<div class="mb-4">
+        <h5>${title}</h5>
+        <div class="list-group w-75 mx-auto text-start">`;
+
+      results.forEach(item => {
+        const rating = getRandomRating();
+        const stars = getStarHTML(rating);
+        const review = getRandomReview();
+
+        html += `
+          <div class="list-group-item">
+            <h6 class="mb-1">${item} (${typeLabel})</h6>
+            <div class="text-warning mb-1" style="font-size: 1.2rem;">${stars}</div>
+            <p class="text-muted" style="font-size: 0.9rem;">"${review}"</p>
+          </div>`;
+      });
+
+      html += `</div></div>`;
+      resultContainer.innerHTML += html;
+    }
+
+    function toggleChatbot() {
+      const bot = document.getElementById("chatbot");
+      bot.style.display = bot.style.display === "none" ? "block" : "none";
+    }
+
+    function sendChatMessage() {
+      const input = document.getElementById("chat-input");
+      const history = document.getElementById("chat-history");
+      const userMessage = input.value.trim();
+      if (!userMessage) return;
+
+      history.innerHTML += `<div><strong>You:</strong> ${userMessage}</div>`;
+
+      const response = generateBotResponse(userMessage);
+      setTimeout(() => {
+        history.innerHTML += `<div><strong>Assistant:</strong> ${response}</div>`;
+        history.scrollTop = history.scrollHeight;
+      }, 500);
+
+      input.value = "";
+    }
+
+    function generateBotResponse(message) {
+      const lower = message.toLowerCase();
+
+      if (lower.includes("hello") || lower.includes("hi")) return "Hi there! 😊 How can I help you today?";
+      if (lower.includes("supplier")) return "🔍 Searching suppliers? Try typing their name above.";
+      if (lower.includes("food") || lower.includes("item")) return "🍅 You can search for food items like Tomato, Rice, etc.";
+      if (lower.includes("wallet")) return "👛 You can manage your balance and transactions in the Wallet section.";
+      if (lower.includes("help") || lower.includes("support")) return "🛠️ I'm here to help! Try asking about suppliers or food items.";
+
+      return "🤖 I'm your assistant. Try asking about food, suppliers, or services!";
+    }
+
+    function onScanSuccess(decodedText) {
+      document.getElementById("qr-result").innerText = `Scanned QR Code: ${decodedText}`;
+      localStorage.setItem("scannedQRData", decodedText);
+    }
+
+    const qrScanner = new Html5QrcodeScanner("qr-reader", { fps: 10, qrbox: 250 });
+    qrScanner.render(onScanSuccess);
+  </script>
+</body>
+</html>

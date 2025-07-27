@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>About Us</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(to right, #e8f5e9, #c8e6c9);
+      color: #2e7d32;
+      position: relative;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 900px;
+      margin: 40px auto;
+      padding: 30px;
+      background-color: #ffffff;
+      border-radius: 16px;
+      box-shadow: 0 6px 16px rgba(0, 100, 0, 0.1);
+    }
+    h1 {
+      color: #1b5e20;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+    p {
+      line-height: 1.8;
+      margin-bottom: 20px;
+      font-size: 16px;
+    }
+    .highlight {
+      color: #388e3c;
+      font-weight: bold;
+    }
+    p:last-child {
+      text-align: center;
+      font-size: 18px;
+    }
+
+    /* Floating button & icon */
+    .floating-button {
+      position: fixed;
+      bottom: 40px;
+      right: 40px;
+      background-color: #4caf50;
+      color: white;
+      border: none;
+      border-radius: 50px;
+      padding: 14px 24px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      text-decoration: none;
+      transition: background 0.3s ease;
+      z-index: 999;
+    }
+    .floating-button:hover {
+      background-color: #388e3c;
+    }
+
+    .hand-icon {
+      position: fixed;
+      bottom: 100px;
+      right: 60px;
+      font-size: 30px;
+      transform: rotate(-20deg);
+      animation: bounce 1.2s infinite;
+      z-index: 998;
+    }
+
+    @keyframes bounce {
+      0%, 100% {
+        transform: translateY(0) rotate(-20deg);
+      }
+      50% {
+        transform: translateY(-10px) rotate(-20deg);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>About Us</h1>
+    <p>
+      Welcome to <span class="highlight">Bazar Bandhu</span>! We're a passionate team of developers, designers, and creators committed to building innovative and impactful web experiences.
+    </p>
+    <p>
+      Our mission is to <strong>solve real-world problems</strong> through simple, user-friendly, and efficient digital solutions. Whether it's for education, healthcare, productivity, or entertainment, we believe in using technology to make life easier and more meaningful.
+    </p>
+    <p>
+      This project was started with a vision to create something that not only works well but also delivers real value to users. Every feature, page, and function has been crafted with care and precision.
+    </p>
+    <p>
+      We value <strong>transparency, collaboration, and learning</strong>—and we welcome feedback and contributions from the community. Feel free to connect with us or explore more about our journey.
+    </p>
+    <p>
+      Thank you for visiting! ❤
+    </p>
+  </div>
+
+  <!-- Hand Icon -->
+  <div class="hand-icon">👇</div>
+
+  <!-- Let's Go Button -->
+  <a href="home.html" class="floating-button">Let's Go!</a>
+
+</body>
+</html>
